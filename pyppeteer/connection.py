@@ -148,10 +148,11 @@ class Connection(EventEmitter):
             self._closeCallback = None
 
         for cb in self._callbacks.values():
-            cb.set_exception(_rewriteError(
-                cb.error,  # type: ignore
-                f'Protocol error {cb.method}: Target closed.',  # type: ignore
-            ))
+            if not cb.done():
+                cb.set_exception(_rewriteError(
+                    cb.error,  # type: ignore
+                    f'Protocol error {cb.method}: Target closed.',  # type: ignore
+                ))
         self._callbacks.clear()
 
         for session in self._sessions.values():
@@ -288,10 +289,11 @@ class CDPSession(EventEmitter):
 
     def _on_closed(self) -> None:
         for cb in self._callbacks.values():
-            cb.set_exception(_rewriteError(
-                cb.error,  # type: ignore
-                f'Protocol error {cb.method}: Target closed.',  # type: ignore
-            ))
+            if not cb.done():
+                cb.set_exception(_rewriteError(
+                    cb.error,  # type: ignore
+                    f'Protocol error {cb.method}: Target closed.',  # type: ignore
+                ))
         self._callbacks.clear()
         self._connection = None
 
